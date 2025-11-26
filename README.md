@@ -12,16 +12,10 @@
 
 ---
 
-# My Project (Vue + React + Node.js)
+# LMS-Project (Vue + React + Node.js)
 
 Project ini terdiri dari 3 bagian utama:
 
 - **Front-end (Vue.js)** → UI berbasis Vue 3 dengan Vite.
 - **Front-end (React.js)** → UI berbasis React 18 dengan Vite/CRA.
 - **Back-end (Node.js + Express)** → REST API untuk melayani kedua front-end.
-
----
-
-## 🚧 Status
-Project masih dalam tahap pengembangan.  
-Beberapa fitur sudah berjalan, namun masih ada yang dalam progress.
