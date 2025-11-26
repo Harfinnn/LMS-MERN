@@ -13,7 +13,7 @@ import ManageStudentPage from "../pages/manager/students";
 import ManageStudentCreatePage from "../pages/student-create";
 import StudentPage from "../pages/student/studentOverview";
 import secureLocalStorage from "react-secure-storage";
-import { MANAGER_SESSION, STORAGE_KEY } from "../utils/const";
+import { MANAGER_SESSION, STORAGE_KEY, STUDENT_SESSION } from "../utils/const";
 import {
   getCategories,
   getCourseDetail,
@@ -21,7 +21,11 @@ import {
   getDetailContent,
   getStudentsCourse,
 } from "../services/courseService";
-import { getDetailStudent, getStudents } from "../services/studentService";
+import {
+  getCoursesStudents,
+  getDetailStudent,
+  getStudents,
+} from "../services/studentService";
 import StudentCourseList from "../pages/manager/student-course";
 import StudentForm from "../pages/manager/student-course/student-form";
 import { getOverviews } from "../services/overviewService";
@@ -43,6 +47,7 @@ const router = createBrowserRouter([
 
       return true;
     },
+    element: <SignInPage />,
   },
   {
     path: "/manager/sign-up",
@@ -78,9 +83,9 @@ const router = createBrowserRouter([
       {
         index: true,
         loader: async () => {
-          const overviews = await getOverviews()
+          const overviews = await getOverviews();
 
-          return overviews?.data
+          return overviews?.data;
         },
         element: <ManagerHomePage />,
       },
@@ -120,7 +125,7 @@ const router = createBrowserRouter([
         loader: async ({ params }) => {
           const course = await getCourseDetail(params.id);
 
-          return course?.data
+          return course?.data;
         },
         element: <ManageCourseDetailPage />,
       },
@@ -130,77 +135,111 @@ const router = createBrowserRouter([
       },
       {
         path: "/manager/courses/:id/edit/:contentId",
-        loader: async ({params}) => {
-          const content = await getDetailContent(params.contentId)
+        loader: async ({ params }) => {
+          const content = await getDetailContent(params.contentId);
 
-          return content?.path
+          return content?.path;
         },
         element: <ManageContentCreatePage />,
       },
       {
         path: "/manager/courses/:id/preview",
-        loader: async ({params}) => {
-          const course = await getCourseDetail(params.id, true)
+        loader: async ({ params }) => {
+          const course = await getCourseDetail(params.id, true);
 
-          return course?.data
+          return course?.data;
         },
         element: <ManageCoursePreviewPage />,
       },
       {
         path: "/manager/students",
         loader: async () => {
-          const students = await getStudents()
+          const students = await getStudents();
 
-          return students?.data
+          return students?.data;
         },
         element: <ManageStudentPage />,
       },
       {
         path: "/manager/students/create",
-        element: <ManageStudentCreatePage />
+        element: <ManageStudentCreatePage />,
       },
       {
         path: "/manager/students/edit/:id",
-        loader: async({params}) => {
-          const student = await getDetailStudent(params.id)
+        loader: async ({ params }) => {
+          const student = await getDetailStudent(params.id);
 
-          return student?.data
+          return student?.data;
         },
-        element: <ManageStudentCreatePage />
+        element: <ManageStudentCreatePage />,
       },
       {
         path: "/manager/courses/students/:id",
-        loader: async({params}) => {
-          const course = await getStudentsCourse(params.id)
+        loader: async ({ params }) => {
+          const course = await getStudentsCourse(params.id);
 
-          return course?.data
+          return course?.data;
         },
-        element: <StudentCourseList />
+        element: <StudentCourseList />,
       },
       {
         path: "/manager/courses/students/:id/add",
         loader: async () => {
-          const students = await getStudents()
+          const students = await getStudents();
 
-          return students?.data
+          return students?.data;
         },
-        element: <StudentForm />
-      }
+        element: <StudentForm />,
+      },
     ],
   },
   {
     path: "/student",
+    id: STUDENT_SESSION,
+    loader: async () => {
+      const session = secureLocalStorage.getItem(STORAGE_KEY);
+
+      if (!session || session.role !== "student") {
+        throw redirect("/student/sign-in");
+      }
+
+      return session;
+    },
     element: <LayoutDashboard isAdmin={false} />,
     children: [
       {
         index: true,
+        loader: async () => {
+          const courses = await getCoursesStudents();
+
+          return courses?.data;
+        },
         element: <StudentPage />,
       },
       {
         path: "/student/detail-course/:id",
-        element: <ManageCoursePreviewPage />,
+        loader: async ({ params }) => {
+          const course = await getCourseDetail(params.id, true);
+
+          return course?.data;
+        },
+        element: <ManageCoursePreviewPage isAdmin={false} />,
       },
     ],
+  },
+  {
+    path: "/student/sign-in",
+    element: <SignInPage />,
+    loader: async () => {
+      const session = secureLocalStorage.getItem(STORAGE_KEY);
+
+      if (session && session.role === "student") {
+        throw redirect("/student");
+      }
+
+      return true;
+    },
+    element: <SignInPage type="student" />,
   },
 ]);
 

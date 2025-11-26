@@ -59,7 +59,7 @@ export const getCategories = async (req, res) => {
     }
 }
 
-export const getCoursesById = async (req, res) => {
+export const getCourseById = async (req, res) => {
     try {
         const {id} = req.params
         const {preview} = req.query 
